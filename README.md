@@ -44,14 +44,14 @@ Tested on pytorch >= 1.0 and python3.
 ```shell
 bash ./scripts/train_sq_1stage.sh
 ```
-* Train the C4_sq_3stage (Before that, please put the directory `./log/C4_sq_1stage` in `./trained_model` before):
+* Train the C4_sq_3stage (Before that, please move the directory `./log/C4_sq_1stage` to `./trained_model`):
 ```shell
 bash ./scripts/train_sq_3stage.sh
 ```
 
 ### Testing
 
-* After training, move the trained models directory in `./log` to `./trained_model/`, and run:
+* After training, move the trained models directory in `./log/C4_sq_3stage` to `./trained_model/`, and run:
 ```shell
 bash ./scripts/test_sq_3stage.sh
 ```
