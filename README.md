@@ -51,7 +51,7 @@ bash ./scripts/train_sq_3stage.sh
 
 ### Testing
 
-* After training, move the trained models to  `C4/trained_model/`, and run:
+* After training, move the trained models directory in `./log` to `./trained_model/`, and run:
 ```shell
 bash ./scripts/test_sq_3stage.sh
 ```
