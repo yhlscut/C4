@@ -34,7 +34,7 @@ Tested on pytorch >= 1.0 and python3.
 ```
 
 ### Pretrained models
-* Pretained models can be downloaded [here](https://1drv.ms/u/s!AkGWFI5PP7sYarUAuXBGR3leujQ?e=Klqeg0). To reproduce the results reported in the paper, the pretrained models(*.pth) should be placed in `./trained_models/`, and then test model directly
+* Pretrained models can be downloaded [here](https://1drv.ms/u/s!AkGWFI5PP7sYarUAuXBGR3leujQ?e=Klqeg0). To reproduce the results reported in the paper, the pretrained models(*.pth) should be placed in `./trained_models/`, and then test model directly
 
 ## Run code
 
