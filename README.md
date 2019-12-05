@@ -39,7 +39,7 @@ Tested on pytorch >= 1.0 and python3.
 ## Run code
 
 ### Training
-* Please train the three-fold models (modify `foldnum=0` to be `foldnum=1` or `foldnum=2` in line 6 of `。./scripts/train_sq_1stage.sh` and `./scripts/train_sq_3stage.sh`)
+* Please train the three-fold models (modify `foldnum=0` to be `foldnum=1` or `foldnum=2` in line 6 of `./scripts/train_sq_1stage.sh` and `./scripts/train_sq_3stage.sh` accordingly)
 * Train the C4_sq_1stage first:
 ```shell
 bash ./scripts/train_sq_1stage.sh
