@@ -37,7 +37,11 @@ Tested on pytorch >= 1.0 and python3.
 * Pretrained models can be downloaded [here](https://1drv.ms/u/s!AkGWFI5PP7sYarUAuXBGR3leujQ?e=Klqeg0). To reproduce the results reported in the paper, the pretrained models(*.pth) should be placed in `./trained_models/`, and then test model directly
 
 ## Run code
+Open the visdom service
+```shell
+python -m visdom.server -p 8008
 
+```
 ### Training
 * Please train the three-fold models (modify `foldnum=0` to be `foldnum=1` or `foldnum=2` in line 6 of `./scripts/train_sq_1stage.sh` and `./scripts/train_sq_3stage.sh` accordingly)
 * Train the C4_sq_1stage first:
