@@ -13,7 +13,7 @@ git clone https://github.com/yhlscut/C4.git
 cd C4
 ## Create python env with relevant packages
 conda create --name C4 python=3.6
-conda activate C4
+source activate C4
 pip install -U pip
 pip install -r requirements.txt
 conda install pytorch torchvision cudatoolkit=9.0 -c pytorch  # cudatoolkit=10.0 for cuda10
