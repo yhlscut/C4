@@ -145,7 +145,7 @@ for epoch in range(opt.nepoch):
         best_bst25 = bst25
         best_wst25 = wst25
         best_pct95 = pct95      
-        torch.save(network.state_dict(), '%s/fold_%d.pth' % (dir_name,opt.foldnum))                
+        torch.save(network.state_dict(), '%s/fold%d.pth' % (dir_name,opt.foldnum))                
     log_table = {
       "train_loss" : train_loss.avg,
       "val_loss" : val_loss.avg,
