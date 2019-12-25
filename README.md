@@ -24,7 +24,7 @@ Tested on pytorch >= 1.0 and python3.
 ## Download
 ### Dataset
 
-[*Shi's Re-processing of Gehler's Raw Dataset*:](http://www.cs.sfu.ca/~colour/data/shi_gehler/)
+Shi's Re-processing of Gehler's Raw Dataset:(http://www.cs.sfu.ca/~colour/data/shi_gehler/)
 
  - Download the 4 zip files from the website and unzip them 
  - Extract images in the `/cs/chroma/data/canon_dataset/586_dataset/png` directory into `./data/images/`, without creating subfolders.
@@ -34,7 +34,7 @@ Tested on pytorch >= 1.0 and python3.
 ```
 
 ### Pretrained models
-* Pretrained models can be downloaded [here](https://1drv.ms/u/s!AkGWFI5PP7sYarUAuXBGR3leujQ?e=Klqeg0). To reproduce the results reported in the paper, the pretrained models(*.pth) should be placed in `./trained_models/`, and then test model directly
+* Pretrained models can be downloaded [here](https://1drv.ms/u/s!AiCnTyx4Rm42bk_D5EUMxMe3zk4?e=6ntqWg). To reproduce the results reported in the paper, the pretrained models(*.pth) should be placed in `./trained_models/`, and then test model directly
 
 ## Run code
 Open the visdom service
@@ -59,4 +59,4 @@ bash ./scripts/train_sq_3stage.sh
 ```shell
 bash ./scripts/test_sq_3stage.sh
 ```
-* To reproduce the results reported in the paper, move the pretrained models(*.pth) downloaded from [here](https://1drv.ms/u/s!AkGWFI5PP7sYarUAuXBGR3leujQ?e=Klqeg0) to `./trained_models/`, and then test model directly.
+* To reproduce the results reported in the paper, move the pretrained models(*.pth) downloaded from [here](https://1drv.ms/u/s!AiCnTyx4Rm42bk_D5EUMxMe3zk4?e=6ntqWg) to `./trained_models/`, and then test model directly.
