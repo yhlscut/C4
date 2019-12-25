@@ -24,7 +24,7 @@ Tested on pytorch >= 1.0 and python3.
 ## Download
 ### Dataset
 
-Shi's Re-processing of Gehler's Raw Dataset:(http://www.cs.sfu.ca/~colour/data/shi_gehler/)
+[Shi's Re-processing of Gehler's Raw Dataset]:(http://www.cs.sfu.ca/~colour/data/shi_gehler/)
 
  - Download the 4 zip files from the website and unzip them 
  - Extract images in the `/cs/chroma/data/canon_dataset/586_dataset/png` directory into `./data/images/`, without creating subfolders.
