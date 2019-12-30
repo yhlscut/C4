@@ -64,11 +64,11 @@ bash ./scripts/test_sq_3stage.sh
 ## Citing this work
 If you find this code useful for your research, please consider citing the following paper:
 
-	@article{yu2019cascading,
+	@inproceedings{yu2019cascading,
 	  title={Cascading Convolutional Color Constancy},
 	  author={Yu, Huanglin and Chen, Ke and Wang, Kaiqi and Qian, Yanlin and Zhang, Zhaoxiang and Jia, Kui},
-	  journal={arXiv preprint arXiv:1912.11180},
-	  year={2019}
+	  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+	  year={2020}
 	}
 
 ## Acknowledgements
