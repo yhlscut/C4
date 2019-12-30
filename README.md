@@ -1,7 +1,7 @@
 # Cascading Convolutional Color Constancy
 
 Huanglin Yu, Ke Chen*, Kaiqi Wang, Yanlin Qian, Zhaoxiang Zhang, Kui Jia &nbsp; &nbsp;
-AAAI 2020 [[paper](https://arxiv.org/pdf/1912.11180.pdf)]
+AAAI 2020 [[paper link](https://arxiv.org/pdf/1912.11180.pdf)]
 
 This implementation uses [Pytorch](http://pytorch.org/).
 
