@@ -1,7 +1,7 @@
 # Cascading Convolutional Color Constancy
 
 Huanglin Yu, Ke Chen*, Kaiqi Wang, Yanlin Qian, Zhaoxiang Zhang, Kui Jia &nbsp; &nbsp;
-AAAI 2020
+AAAI 2020 [[paper](https://arxiv.org/pdf/1912.11180.pdf)]
 
 This implementation uses [Pytorch](http://pytorch.org/).
 
@@ -60,3 +60,16 @@ bash ./scripts/train_sq_3stage.sh
 bash ./scripts/test_sq_3stage.sh
 ```
 * To reproduce the results reported in the paper, move the pretrained models(*.pth) downloaded from [here](https://1drv.ms/u/s!AiCnTyx4Rm42bk_D5EUMxMe3zk4?e=6ntqWg) to `./trained_models/`, and then test model directly.
+
+## Citing this work
+If you find this code useful for your research, please consider citing the following paper:
+
+	@article{yu2019cascading,
+	  title={Cascading Convolutional Color Constancy},
+	  author={Yu, Huanglin and Chen, Ke and Wang, Kaiqi and Qian, Yanlin and Zhang, Zhaoxiang and Jia, Kui},
+	  journal={arXiv preprint arXiv:1912.11180},
+	  year={2019}
+	}
+
+## Acknowledgements
+This work is supported in part by the National Natural Science Foundation of China (Grant No.: 61771201,61902131), the Program for Guangdong Introducing Innovative and Enterpreneurial Teams (Grant No.:2017ZT07X183), the Fundamental Research Funds for the Central Universities (Grant No.: D2193130), and the SCUT Program (Grant No.: D6192110).
