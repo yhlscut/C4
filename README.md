@@ -10,7 +10,7 @@ Please install [Anaconda](https://www.anaconda.com/distribution/) firstly.
 
 ```shell
 git clone https://github.com/yhlscut/C4.git
-cd C4
+cd C4-master
 ## Create python env with relevant packages
 conda create --name C4 python=3.6
 source activate C4
