@@ -34,7 +34,7 @@ Tested on pytorch >= 1.0 and python3.
 ```
 
 ### Pretrained models
-* Pretrained models can be downloaded [here](https://1drv.ms/u/s!AiCnTyx4Rm42bk_D5EUMxMe3zk4?e=6ntqWg). To reproduce the results reported in the paper, the pretrained models(*.pth) should be placed in `./trained_models/`, and then test model directly
+* Pretrained models can be downloaded [here](https://mailscuteducn-my.sharepoint.com/:u:/g/personal/eeyu_huanglin_mail_scut_edu_cn/EWC9feVv13NFpHZAUz1rj9wBHmYXvHZEILfVPaAOzKgDLg?e=6dUS8C). To reproduce the results reported in the paper, the pretrained models(*.pth) should be placed in `./trained_models/`, and then test model directly
 
 ## Run code
 Open the visdom service
@@ -59,7 +59,7 @@ bash ./scripts/train_sq_3stage.sh
 ```shell
 bash ./scripts/test_sq_3stage.sh
 ```
-* To reproduce the results reported in the paper, move the pretrained models(*.pth) downloaded from [here](https://1drv.ms/u/s!AiCnTyx4Rm42bk_D5EUMxMe3zk4?e=6ntqWg) to `./trained_models/`, and then test model directly.
+* To reproduce the results reported in the paper, move the pretrained models(*.pth) downloaded from [here](https://mailscuteducn-my.sharepoint.com/:u:/g/personal/eeyu_huanglin_mail_scut_edu_cn/EWC9feVv13NFpHZAUz1rj9wBHmYXvHZEILfVPaAOzKgDLg?e=6dUS8C) to `./trained_models/`, and then test model directly.
 
 ## Citing this work
 If you find this code useful for your research, please consider citing the following paper:
