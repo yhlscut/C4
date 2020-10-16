@@ -11,8 +11,8 @@ import torch.utils.data
 import visdom
 
 from auxiliary.dataset import *
-from auxiliary.model import CreateNet, squeezenet1_1
 from auxiliary.utils import *
+from classes.c4.models.Model1Stage import Model1Stage
 
 
 def main(log_name: str):
@@ -36,8 +36,7 @@ def main(log_name: str):
     print('training fold %d' % opt.foldnum)
 
     # Create the network
-    SqueezeNet = squeezenet1_1(pretrained=True)
-    network = CreateNet(SqueezeNet).to(device)
+    network = Model1Stage().to(device)
     if opt.pth_path != '':
         print('loading pretrained model')
         network.load_state_dict(torch.load(opt.pth_path))

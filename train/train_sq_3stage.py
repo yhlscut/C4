@@ -11,7 +11,6 @@ import torch.utils.data
 import visdom
 
 from auxiliary.dataset import *
-from auxiliary.model import CreateNet_3stage
 from auxiliary.utils import *
 
 
@@ -38,7 +37,7 @@ def main(log_name):
     print('training fold %d' % opt.foldnum)
 
     # Create the network
-    network = CreateNet_3stage().to(device)
+    network = Model3Stages().to(device)
     if opt.pth_path != '':
         print('loading pretrained model')
         network.submodel1.load_state_dict(torch.load(opt.pth_path))

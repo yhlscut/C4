@@ -150,9 +150,9 @@ class CreateNet(nn.Module, ABC):
         return x
 
 
-class CreateNet_3stage(nn.Module, ABC):
+class Model3Stages(nn.Module, ABC):
     def __init__(self, num_model=2):
-        super(CreateNet_3stage, self).__init__()
+        super(Model3Stages, self).__init__()
         self.submodel1 = CreateNet(squeezenet1_1(pretrained=True))
         self.submodel2 = CreateNet(squeezenet1_1(pretrained=True))
         self.submodel3 = CreateNet(squeezenet1_1(pretrained=True))

@@ -6,7 +6,6 @@ import torch.utils.data
 from torch.autograd import Variable
 
 from auxiliary.dataset import *
-from auxiliary.model import CreateNet_3stage
 from auxiliary.utils import *
 
 
@@ -16,7 +15,7 @@ def main(opt):
     device = get_device()
 
     # Create network
-    network = CreateNet_3stage().to(device)
+    network = Model3Stages().to(device)
     network.eval()
 
     for i in range(3):

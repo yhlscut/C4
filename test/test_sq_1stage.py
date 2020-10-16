@@ -6,7 +6,7 @@ import torch.utils.data
 from torch.autograd import Variable
 
 from auxiliary.dataset import *
-from auxiliary.model import squeezenet1_1, CreateNet
+from auxiliary.model import squeezenet1_1
 from auxiliary.utils import *
 
 
@@ -16,7 +16,7 @@ def main():
 
     # Create the network
     SqueezeNet = squeezenet1_1(pretrained=True)
-    network = CreateNet(SqueezeNet).to(device)
+    network = Model1Stage(SqueezeNet).to(device)
     network.eval()
 
     for i in range(3):
