@@ -10,9 +10,9 @@ import torch.optim as optim
 import torch.utils.data
 import visdom
 
-from auxiliary.dataset import *
 from auxiliary.utils import *
 from classes.c4.models.Model1Stage import Model1Stage
+from classes.data.ColorChecker import ColorCheckerDataset
 
 
 def main(log_name: str):
@@ -24,13 +24,13 @@ def main(log_name: str):
     win_curve = vis.line(X=np.array([0]), Y=np.array([0]))
 
     # Load data
-    dataset_train = ColorChecker(train=True, folds_num=opt.foldnum)
+    dataset_train = ColorCheckerDataset(train=True, folds_num=opt.foldnum)
     dataloader_train = torch.utils.data.DataLoader(dataset_train,
                                                    batch_size=opt.batch_size,
                                                    shuffle=True,
                                                    num_workers=opt.workers)
     print('len_dataset_train:', len(dataset_train))
-    dataset_test = ColorChecker(train=False, folds_num=opt.foldnum)
+    dataset_test = ColorCheckerDataset(train=False, folds_num=opt.foldnum)
     dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=1, shuffle=True, num_workers=opt.workers)
     print('len_dataset_test:', len(dataset_test))
     print('training fold %d' % opt.foldnum)
@@ -66,7 +66,7 @@ def main(log_name: str):
 
         for _, data in enumerate(dataloader_train):
             optimizer.zero_grad()
-            img, label, fn = data
+            img, label, file_name = data
             img, label = img.to(device), label.to(device)
 
             pred = network(img)
@@ -100,7 +100,7 @@ def main(log_name: str):
                 errors = []
 
                 for _, data in enumerate(dataloader_test):
-                    img, label, fn = data
+                    img, label, file_name = data
                     img, label = img.to(device), label.to(device)
 
                     pred = network(img)

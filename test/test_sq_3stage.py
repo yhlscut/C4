@@ -3,9 +3,9 @@ from __future__ import print_function
 import argparse
 
 import torch.utils.data
+from auxiliary.dataset import *
 from torch.autograd import Variable
 
-from auxiliary.dataset import *
 from auxiliary.utils import *
 
 
@@ -19,7 +19,7 @@ def main(opt):
     network.eval()
 
     for i in range(3):
-        dataset_test = ColorChecker(train=False, folds_num=i)
+        dataset_test = ColorCheckerDataset(train=False, folds_num=i)
         dataloader_test = torch.utils.data.DataLoader(dataset_test,
                                                       batch_size=1,
                                                       shuffle=False,
@@ -36,14 +36,14 @@ def main(opt):
         # Load parameters
         network.load_state_dict(torch.load(pth_path, map_location=device))
         for i, data in enumerate(dataloader_test):
-            img, label, fn = data
+            img, label, file_name = data
             img = Variable(img.to(device))
             label = Variable(label.to(device))
             pred1, pred2, pred3, = network(img)
             loss = get_angular_loss(torch.mul(torch.mul(pred1, pred2), pred3), label)
             val_loss.update(loss.item())
             errors.append(loss.item())
-            print('Model: %s, AE: %f' % (fn[0], loss.item()))
+            print('Model: %s, AE: %f' % (file_name[0], loss.item()))
 
     mean, median, trimean, bst25, wst25, pct95 = evaluate(errors)
     print('Mean: %f, Med: %f, tri: %f, bst: %f, wst: %f, pct: %f' % (mean, median, trimean, bst25, wst25, pct95))

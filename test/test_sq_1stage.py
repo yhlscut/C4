@@ -5,8 +5,6 @@ import argparse
 import torch.utils.data
 from torch.autograd import Variable
 
-from auxiliary.dataset import *
-from auxiliary.model import squeezenet1_1
 from auxiliary.utils import *
 
 
@@ -21,7 +19,7 @@ def main():
 
     for i in range(3):
         ############################################test fold 0############################################
-        dataset_test = ColorChecker(train=False, folds_num=i)
+        dataset_test = ColorCheckerDataset(train=False, folds_num=i)
         dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=1, shuffle=False,
                                                       num_workers=opt.workers)
         len_dataset_test = len(dataset_test)
@@ -37,7 +35,7 @@ def main():
         network.eval()
         with torch.no_grad():
             for i, data in enumerate(dataloader_test):
-                img, label, fn = data
+                img, label, file_name = data
                 img = Variable(img.cuda())
                 label = Variable(label.cuda())
                 pred = network(img)
@@ -45,7 +43,7 @@ def main():
                 loss = get_angular_loss(pred_ill, label)
                 val_loss.update(loss.item())
                 errors.append(loss.item())
-                print('Model: %s, AE: %f' % (fn[0], loss.item()))
+                print('Model: %s, AE: %f' % (file_name[0], loss.item()))
 
     mean, median, trimean, bst25, wst25, pct95 = evaluate(errors)
     print('Mean: %f, Med: %f, tri: %f, bst: %f, wst: %f, pct: %f' % (mean, median, trimean, bst25, wst25, pct95))

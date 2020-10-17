@@ -1,5 +1,5 @@
 import os
-import sys
+
 import cv2
 import numpy as np
 
@@ -18,29 +18,29 @@ def main():
     # generate npy data
     for l in all_data_list:
         illums = []
-        fn = l.strip().split(' ')[1]
+        file_name = l.strip().split(' ')[1]
         illums.append(float(l.strip().split(' ')[2]))
         illums.append(float(l.strip().split(' ')[3]))
         illums.append(float(l.strip().split(' ')[4]))
         np.vstack(illums)
-        mcc_coord = get_mcc_coord(fn)      
-        img_without_mcc = load_image_without_mcc(fn,mcc_coord)
-        np.save('./data/ndata/'+fn+'.npy',img_without_mcc) #img BGR
-        np.save('./data/nlabel/'+fn+'.npy',illums)
-        print(fn)
+        mcc_coord = get_mcc_coord(file_name)
+        img_without_mcc = load_image_without_mcc(file_name,mcc_coord)
+        np.save('./data/ndata/'+file_name+'.npy',img_without_mcc) #img BGR
+        np.save('./data/nlabel/'+file_name+'.npy',illums)
+        print(file_name)
 
-def load_image_without_mcc(fn,mcc_coord):
-    raw = load_image(fn)
+def load_image_without_mcc(file_name,mcc_coord):
+    raw = load_image(file_name)
     img = (np.clip(raw / raw.max(), 0, 1) * 65535.0).astype(np.float32) # clip constrain the value between 0 and 1
     polygon = mcc_coord * np.array([img.shape[1], img.shape[0]]) #the vertex of polygon
     polygon = polygon.astype(np.int32) 
     cv2.fillPoly(img, [polygon], (BOARD_FILL_COLOR,) * 3) # fill the polygon to img
     return img 
         
-def load_image(fn): 
-    file_path = './data/images/' + fn
+def load_image(file_name):
+    file_path = './data/images/' + file_name
     raw = np.array(cv2.imread(file_path, -1), dtype='float32')
-    if fn.startswith('IMG'):
+    if file_name.startswith('IMG'):
       # 5D3 images
       black_point = 129
     else:
@@ -48,9 +48,9 @@ def load_image(fn):
     raw = np.maximum(raw - black_point, [0, 0, 0])  # remain the pixels that raw-black_point>0
     return raw      
 
-def get_mcc_coord(fn):
+def get_mcc_coord(file_name):
     # Note: relative coord
-    with open('./data/coordinates/' + fn.split('.')[0] +'_macbeth.txt', 'r') as f:
+    with open('./data/coordinates/' + file_name.split('.')[0] +'_macbeth.txt', 'r') as f:
         lines = f.readlines()
         width, height = map(float, lines[0].split())
         scale_x = 1 / width
