@@ -6,23 +6,27 @@ import torch.utils.data
 from torch.autograd import Variable
 
 from auxiliary.utils import *
+from classes.c4.models.Model1Stage import Model1Stage
+from classes.data.ColorChecker import ColorCheckerDataset
 
 
 def main():
+    # Set device
+    device = get_device()
+
     val_loss = AverageMeter()
     errors = []
 
     # Create the network
-    SqueezeNet = squeezenet1_1(pretrained=True)
-    network = Model1Stage(SqueezeNet).to(device)
+    network = Model1Stage().to(device)
     network.eval()
 
     for i in range(3):
-        ############################################test fold 0############################################
         dataset_test = ColorCheckerDataset(train=False, folds_num=i)
-        dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=1, shuffle=False,
+        dataloader_test = torch.utils.data.DataLoader(dataset_test,
+                                                      batch_size=1,
+                                                      shuffle=False,
                                                       num_workers=opt.workers)
-        len_dataset_test = len(dataset_test)
         print('Len_fold:', len(dataset_test))
         if i == 0:
             pth_path = opt.pth_path0
@@ -30,14 +34,15 @@ def main():
             pth_path = opt.pth_path1
         elif i == 2:
             pth_path = opt.pth_path2
-            # load parameters
-        network.load_state_dict(torch.load(pth_path))
+
+        # Load parameters
+        network.load_state_dict(torch.load(pth_path, map_location=device), strict=False)
         network.eval()
         with torch.no_grad():
-            for i, data in enumerate(dataloader_test):
+            for _, data in enumerate(dataloader_test):
                 img, label, file_name = data
-                img = Variable(img.cuda())
-                label = Variable(label.cuda())
+                img = Variable(img.to(device))
+                label = Variable(label.to(device))
                 pred = network(img)
                 pred_ill = torch.nn.functional.normalize(torch.sum(torch.sum(pred, 2), 2), dim=1)
                 loss = get_angular_loss(pred_ill, label)
@@ -53,9 +58,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--workers', type=int, help='number of data loading workers', default=20)
     parser.add_argument('--lrate', type=float, default=3e-4, help='learning rate')
-    parser.add_argument('--pth_path0', type=str)
-    parser.add_argument('--pth_path1', type=str)
-    parser.add_argument('--pth_path2', type=str)
+    parser.add_argument("--pth_path0", type=str, default="trained_models/fold0.pth")
+    parser.add_argument("--pth_path1", type=str, default="trained_models/fold1.pth")
+    parser.add_argument("--pth_path2", type=str, default="trained_models/fold2.pth")
     opt = parser.parse_args()
-
     main()

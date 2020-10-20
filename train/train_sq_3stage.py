@@ -12,10 +12,11 @@ import visdom
 from auxiliary.dataset import *
 
 from auxiliary.utils import *
+from classes.c4.models.Model3Stages import Model3Stages
+from classes.data.ColorChecker import ColorCheckerDataset
 
 
 def main(log_name):
-
     # Set device
     device = get_device()
 

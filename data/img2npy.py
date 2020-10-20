@@ -3,65 +3,75 @@ import os
 import cv2
 import numpy as np
 
-BOARD_FILL_COLOR = 1e-5
+"""
+All images in the Color Checker dataset are linear images in the RAW format of the acquisition device, each with a
+Macbeth ColorChecker (MCC) chart, which provides an estimation of illuminant colors. To prevent the CNN from detecting
+and utilizing MCCs as a visual cue, all images are masked with provided locations of MCC during training and testing
+"""
+
 
 def main():
-    datadir='./data/images/'
-    list_path = './data/color_cheker_data_meta.txt'
-    with open(list_path,'r') as f:
-        all_data_list = f.readlines()
-    # make dir
     if not os.path.exists('./data/ndata/'):
         os.mkdir('./data/ndata')
+
     if not os.path.exists('./data/nlabel'):
         os.mkdir('./data/nlabel')
-    # generate npy data
-    for l in all_data_list:
-        illums = []
+
+    # Generate numpy data
+    for l in open('./data/color_checker_data_meta.txt', 'r').readlines():
         file_name = l.strip().split(' ')[1]
-        illums.append(float(l.strip().split(' ')[2]))
-        illums.append(float(l.strip().split(' ')[3]))
-        illums.append(float(l.strip().split(' ')[4]))
-        np.vstack(illums)
-        mcc_coord = get_mcc_coord(file_name)
-        img_without_mcc = load_image_without_mcc(file_name,mcc_coord)
-        np.save('./data/ndata/'+file_name+'.npy',img_without_mcc) #img BGR
-        np.save('./data/nlabel/'+file_name+'.npy',illums)
         print(file_name)
 
-def load_image_without_mcc(file_name,mcc_coord):
-    raw = load_image(file_name)
-    img = (np.clip(raw / raw.max(), 0, 1) * 65535.0).astype(np.float32) # clip constrain the value between 0 and 1
-    polygon = mcc_coord * np.array([img.shape[1], img.shape[0]]) #the vertex of polygon
-    polygon = polygon.astype(np.int32) 
-    cv2.fillPoly(img, [polygon], (BOARD_FILL_COLOR,) * 3) # fill the polygon to img
-    return img 
-        
-def load_image(file_name):
-    file_path = './data/images/' + file_name
-    raw = np.array(cv2.imread(file_path, -1), dtype='float32')
-    if file_name.startswith('IMG'):
-      # 5D3 images
-      black_point = 129
-    else:
-      black_point = 1
-    raw = np.maximum(raw - black_point, [0, 0, 0])  # remain the pixels that raw-black_point>0
-    return raw      
+        illuminants = [float(l.strip().split(' ')[2]), float(l.strip().split(' ')[3]), float(l.strip().split(' ')[4])]
+        np.vstack(illuminants)
+        np.save('./data/nlabel/' + file_name + '.npy', illuminants)
 
-def get_mcc_coord(file_name):
-    # Note: relative coord
-    with open('./data/coordinates/' + file_name.split('.')[0] +'_macbeth.txt', 'r') as f:
-        lines = f.readlines()
-        width, height = map(float, lines[0].split())
-        scale_x = 1 / width
-        scale_y = 1 / height
-        lines = [lines[1], lines[2], lines[4], lines[3]]
-        polygon = []
-        for line in lines:
-            line = line.strip().split()
-            x, y = (scale_x * float(line[0])), (scale_y * float(line[1]))
-            polygon.append((x, y))
-        return np.array(polygon, dtype='float32') 
-        
-if __name__=='__main__':
-    main()        
+        # BGR image
+        img_without_mcc = load_image_without_mcc(file_name, get_mcc_coord(file_name))
+        np.save('./data/ndata/' + file_name + '.npy', img_without_mcc)
+
+
+def load_image_without_mcc(file_name: str, mcc_coord: np.array) -> np.array:
+    raw = load_image(file_name)
+
+    # Clip the values between 0 and 1
+    img = (np.clip(raw / raw.max(), 0, 1) * 65535.0).astype(np.float32)
+
+    # Get the vertices of polygon the
+    polygon = mcc_coord * np.array([img.shape[1], img.shape[0]])
+    polygon = polygon.astype(np.int32)
+
+    # Fill the polygon to img
+    cv2.fillPoly(img, [polygon], (1e-5,) * 3)
+
+    return img
+
+
+def load_image(file_name: str) -> np.array:
+    raw = np.array(cv2.imread('./data/images/' + file_name, -1), dtype='float32')
+
+    # Handle pictures taken with Canon 5d Mark III
+    black_point = 129 if file_name.startswith('IMG') else 1
+
+    # Keep only the pixels such that raw - black_point > 0
+    return np.maximum(raw - black_point, [0, 0, 0])
+
+
+def get_mcc_coord(file_name: str) -> np.array:
+    """ Computes the relative MCC coordinates for the given image """
+
+    lines = open("./data/coordinates/" + file_name.split('.')[0] + "_macbeth.txt", 'r').readlines()
+    width, height = map(float, lines[0].split())
+    scale_x, scale_y = 1 / width, 1 / height
+
+    polygon = []
+    for line in [lines[1], lines[2], lines[4], lines[3]]:
+        line = line.strip().split()
+        x, y = (scale_x * float(line[0])), (scale_y * float(line[1]))
+        polygon.append((x, y))
+
+    return np.array(polygon, dtype='float32')
+
+
+if __name__ == '__main__':
+    main()

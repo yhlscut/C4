@@ -3,10 +3,11 @@ from __future__ import print_function
 import argparse
 
 import torch.utils.data
-from auxiliary.dataset import *
 from torch.autograd import Variable
 
 from auxiliary.utils import *
+from classes.c4.models.Model3Stages import Model3Stages
+from classes.data.ColorChecker import ColorCheckerDataset
 
 
 def main(opt):
@@ -24,8 +25,7 @@ def main(opt):
                                                       batch_size=1,
                                                       shuffle=False,
                                                       num_workers=opt.workers)
-        len_dataset_test = len(dataset_test)
-        print("Len_fold:", len_dataset_test)
+        print("Len_fold:", len(dataset_test))
         if i == 0:
             pth_path = opt.pth_path0
         elif i == 1:
@@ -34,8 +34,8 @@ def main(opt):
             pth_path = opt.pth_path2
 
         # Load parameters
-        network.load_state_dict(torch.load(pth_path, map_location=device))
-        for i, data in enumerate(dataloader_test):
+        network.load_state_dict(torch.load(pth_path, map_location=device), strict=False)
+        for _, data in enumerate(dataloader_test):
             img, label, file_name = data
             img = Variable(img.to(device))
             label = Variable(label.to(device))

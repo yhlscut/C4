@@ -54,17 +54,6 @@ def get_angular_loss(vec1, vec2):
     return loss
 
 
-def correct_image_nolinear(img, ill):
-    # nolinear img, linear ill , return non-linear img
-    nonlinear_ill = torch.pow(ill, 1.0 / 2.2)
-    correct = nonlinear_ill.unsqueeze(2).unsqueeze(3) * torch.sqrt(torch.Tensor([3])).to(get_device())
-    correc_img = torch.div(img, correct + 1e-10)
-    img_max = torch.max(torch.max(torch.max(correc_img, dim=1)[0], dim=1)[0], dim=1)[0] + 1e-10
-    img_max = img_max.unsqueeze(1).unsqueeze(1).unsqueeze(1)
-    img_normalize = torch.div(correc_img, img_max)
-    return img_normalize
-
-
 def evaluate(errors):
     errors = sorted(errors)
 
