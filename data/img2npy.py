@@ -9,26 +9,43 @@ Macbeth ColorChecker (MCC) chart, which provides an estimation of illuminant col
 and utilizing MCCs as a visual cue, all images are masked with provided locations of MCC during training and testing
 """
 
+BASE_PATH_TO_DATA = "data"
+PATH_TO_NUMPY_DATA = os.path.join(BASE_PATH_TO_DATA, "ndata")
+PATH_TO_NUMPY_LABELS = os.path.join(BASE_PATH_TO_DATA, "nlabel")
+PATH_TO_IMAGES = os.path.join(BASE_PATH_TO_DATA, "images")
+PATH_TO_COORDINATES = os.path.join(BASE_PATH_TO_DATA, "coordinates")
+PATH_TO_CC_METADATA = os.path.join(BASE_PATH_TO_DATA, "color_checker_metadata.txt")
+
 
 def main():
-    if not os.path.exists('./data/ndata/'):
-        os.mkdir('./data/ndata')
+    print("\n=================================================\n")
+    print("\t Masking MCC charts")
+    print("\n=================================================\n")
+    print("Paths: \n"
+          "\t - Base path to data ... : {} \n"
+          "\t - Numpy data .......... : {} \n"
+          "\t - Numpy labels ........ : {} \n"
+          "\t - Images .............. : {} \n"
+          "\t - Coordinates ......... : {} \n"
+          .format(BASE_PATH_TO_DATA, PATH_TO_NUMPY_DATA, PATH_TO_NUMPY_LABELS, PATH_TO_IMAGES, PATH_TO_COORDINATES))
 
-    if not os.path.exists('./data/nlabel'):
-        os.mkdir('./data/nlabel')
+    os.makedirs(PATH_TO_NUMPY_DATA, exist_ok=True)
+    os.makedirs(PATH_TO_NUMPY_LABELS, exist_ok=True)
+
+    print("Processing images at {} \n".format(PATH_TO_CC_METADATA))
 
     # Generate numpy data
-    for l in open('./data/color_checker_data_meta.txt', 'r').readlines():
+    for l in open(PATH_TO_CC_METADATA, 'r').readlines():
         file_name = l.strip().split(' ')[1]
         print(file_name)
 
         illuminants = [float(l.strip().split(' ')[2]), float(l.strip().split(' ')[3]), float(l.strip().split(' ')[4])]
         np.vstack(illuminants)
-        np.save('./data/nlabel/' + file_name + '.npy', illuminants)
+        np.save(os.path.join(PATH_TO_NUMPY_LABELS, file_name + '.npy'), illuminants)
 
         # BGR image
         img_without_mcc = load_image_without_mcc(file_name, get_mcc_coord(file_name))
-        np.save('./data/ndata/' + file_name + '.npy', img_without_mcc)
+        np.save(os.path.join(PATH_TO_NUMPY_DATA, file_name + '.npy'), img_without_mcc)
 
 
 def load_image_without_mcc(file_name: str, mcc_coord: np.array) -> np.array:
@@ -42,13 +59,13 @@ def load_image_without_mcc(file_name: str, mcc_coord: np.array) -> np.array:
     polygon = polygon.astype(np.int32)
 
     # Fill the polygon to img
-    cv2.fillPoly(img, [polygon], (1e-5,) * 3)
+    cv2.fillPoly(img, pts=[polygon], color=(1e-5,) * 3)
 
     return img
 
 
 def load_image(file_name: str) -> np.array:
-    raw = np.array(cv2.imread('./data/images/' + file_name, -1), dtype='float32')
+    raw = np.array(cv2.imread(os.path.join(PATH_TO_IMAGES, file_name), -1), dtype='float32')
 
     # Handle pictures taken with Canon 5d Mark III
     black_point = 129 if file_name.startswith('IMG') else 1
@@ -60,7 +77,7 @@ def load_image(file_name: str) -> np.array:
 def get_mcc_coord(file_name: str) -> np.array:
     """ Computes the relative MCC coordinates for the given image """
 
-    lines = open("./data/coordinates/" + file_name.split('.')[0] + "_macbeth.txt", 'r').readlines()
+    lines = open(os.path.join(PATH_TO_COORDINATES, file_name.split('.')[0] + "_macbeth.txt"), 'r').readlines()
     width, height = map(float, lines[0].split())
     scale_x, scale_y = 1 / width, 1 / height
 

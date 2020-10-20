@@ -18,7 +18,7 @@ class ColorCheckerDataset(data.Dataset):
         folds = scipy.io.loadmat('./data/folds.mat')
         img_idx = folds['tr_split' if self.train else 'te_split'][0][folds_num][0]
 
-        self.all_data_list = open("./data/color_checker_data_meta.txt", 'r').readlines()
+        self.all_data_list = open("./data/color_checker_metadata.txt", 'r').readlines()
         self.data_list = [self.all_data_list[i - 1] for i in img_idx]
 
     def __getitem__(self, index: int):
