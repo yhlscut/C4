@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import os
+
 import numpy as np
 import scipy.io
 import torch
@@ -12,25 +14,31 @@ class ColorCheckerDataset(data.Dataset):
 
     def __init__(self, train: bool = True, folds_num: int = 1):
 
-        self.train = train
-        self.da = DataAugmenter()
+        self.__train = train
+        self.__da = DataAugmenter()
 
-        folds = scipy.io.loadmat('./data/folds.mat')
-        img_idx = folds['tr_split' if self.train else 'te_split'][0][folds_num][0]
+        base_path_to_data = "data"
+        path_to_folds = os.path.join(base_path_to_data, "folds.mat")
+        path_to_metadata = os.path.join(base_path_to_data, "color_checker_metadata.txt")
+        self.__path_to_data = os.path.join(base_path_to_data, "ndata")
+        self.__path_to_label = os.path.join(base_path_to_data, "nlabel")
 
-        self.all_data_list = open("./data/color_checker_metadata.txt", 'r').readlines()
-        self.data_list = [self.all_data_list[i - 1] for i in img_idx]
+        folds = scipy.io.loadmat(path_to_folds)
+        img_idx = folds['tr_split' if self.__train else 'te_split'][0][folds_num][0]
 
-    def __getitem__(self, index: int):
-        model = self.data_list[index]
-        file_name = model.strip().split(' ')[1]
-        img = np.array(np.load('./data/ndata/' + file_name + '.npy'), dtype='float32')
-        illums = np.array(np.load('./data/nlabel/' + file_name + '.npy'), dtype='float32')
+        metadata = open(path_to_metadata, 'r').readlines()
+        self.__fold_data = [metadata[i - 1] for i in img_idx]
 
-        if self.train:
-            img, illums = self.da.augment(img, illums)
+    def __getitem__(self, index: int) -> tuple:
+
+        file_name = self.__fold_data[index].strip().split(' ')[1]
+        img = np.array(np.load(os.path.join(self.__path_to_data, file_name + '.npy')), dtype='float32')
+        illuminant = np.array(np.load(os.path.join(self.__path_to_label, file_name + '.npy')), dtype='float32')
+
+        if self.__train:
+            img, illuminant = self.__da.augment(img, illuminant)
         else:
-            img = self.da.crop(img)
+            img = self.__da.crop(img)
 
         img = np.clip(img, 0.0, 65535.0) * (1.0 / 65535)
 
@@ -42,20 +50,12 @@ class ColorCheckerDataset(data.Dataset):
         img = img.transpose(2, 0, 1)
 
         img = torch.from_numpy(img.copy())
-        illums = torch.from_numpy(illums.copy())
+        illuminant = torch.from_numpy(illuminant.copy())
 
-        if not self.train:
+        if not self.__train:
             img = img.type(torch.FloatTensor)
 
-        return img, illums, file_name
+        return img, illuminant, file_name
 
-    def __len__(self):
-        return len(self.data_list)
-
-# if __name__ == '__main__':
-#     dataset = ColorCheckerDataset(train=True)
-#     dataload = torch.utils.data.DataLoader(dataset, batch_size=16, shuffle=False, num_workers=int(30))
-#     for ep in range(10):
-#         time1 = time.time()
-#         for i, data in enumerate(dataload):
-#             img, ill, file_name = data
+    def __len__(self) -> int:
+        return len(self.__fold_data)
