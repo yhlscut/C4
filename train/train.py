@@ -15,6 +15,13 @@ from auxiliary.utils import *
 from classes.c4.networks.Network3Stages import Network3Stages
 from classes.data.ColorChecker import ColorCheckerDataset
 
+WORKERS = 20
+LEARNING_RATE = 3e-4
+PTH_PATH_0 = os.path.join("trained_models", "c4_sq_3stage", "fold0.pth")
+PTH_PATH_1 = os.path.join("trained_models", "c4_sq_3stage", "fold1.pth")
+PTH_PATH_2 = os.path.join("trained_models", "c4_sq_3stage", "fold2.pth")
+ALPHA_1 = 0.33
+ALPHA_2 = 0.33
 
 def main(log_name):
     # Set device

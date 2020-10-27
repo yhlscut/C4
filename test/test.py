@@ -41,7 +41,7 @@ def main():
         dataloader = torch.utils.data.DataLoader(test_set, batch_size=1, shuffle=False, num_workers=workers)
         print('\n Length of fold {}: {} \n'.format(i, len(test_set)))
 
-        model.load_pretrained(path_to_pretrained=pth_paths[i])
+        model.load(path_to_pretrained=pth_paths[i])
         model.evaluation_mode()
 
         with torch.no_grad():
@@ -53,8 +53,13 @@ def main():
                 evaluator.add_error(loss.item())
                 print('\t - Input: %s, AE: %f' % (file_name[0], loss.item()))
 
-    mean, median, trimean, bst25, wst25, pct95 = evaluator.compute_metrics()
-    print('\n Mean: %f, Med: %f, tri: %f, bst: %f, wst: %f, pct: %f' % (mean, median, trimean, bst25, wst25, pct95))
+    metrics = evaluator.compute_metrics()
+    print("\n Mean ............ :{}".format(metrics["mean"]))
+    print(" Median .......... : {}".format(metrics["median"]))
+    print(" Trimean ......... : {}".format(metrics["trimean"]))
+    print(" Best 25% ........ : {}".format(metrics["bst25"]))
+    print(" Worst 25% ....... : {}".format(metrics["wst25"]))
+    print(" Percentile 95 ... : {} \n".format(metrics["pct95"]))
 
 
 if __name__ == '__main__':
@@ -65,4 +70,5 @@ if __name__ == '__main__':
     parser.add_argument("--pth_path1", type=str, default=PTH_PATH_1)
     parser.add_argument("--pth_path2", type=str, default=PTH_PATH_2)
     opt = parser.parse_args()
+    print("\n Configuration: {} \n".format(opt))
     main()

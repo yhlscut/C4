@@ -2,168 +2,138 @@ from __future__ import print_function
 
 import argparse
 import datetime
-import json
 import os
 import time
 
-import torch.optim as optim
 import torch.utils.data
-import visdom
 
 from auxiliary.utils import *
 from classes.c4.models.Model1Stage import Model1Stage
 from classes.data.ColorChecker import ColorCheckerDataset
+from classes.data.Evaluator import Evaluator
+from classes.data.MetricsTracker import MetricsTracker
+from classes.data.VisdomHandler import VisdomHandler
+
+VISDOM_PORT = 8097
+VISDOM_ENV = "mian"
+LOG_DIR = os.path.join("train", "log", "C4_sq_1stage")
+BATCH_SIZE = 16
+NUM_EPOCHS = 2000
+WORKERS = 30
+LEARNING_RATE = 0.0003
+PTH_PATH = ""
+FOLD_NUM = 0
 
 
-def main(log_name: str):
-    # Set device
+def main():
     device = get_device()
+    evaluator = Evaluator()
+    mt = MetricsTracker()
 
-    # Visualization
-    vis = visdom.Visdom(port=8097, env=opt.env + '-' + save_path)
-    win_curve = vis.line(X=np.array([0]), Y=np.array([0]))
+    learning_rate = opt.lrate
+    epochs = opt.nepoch
+    fold_num = opt.foldnum
+    batch_size = opt.batch_size
+    workers = opt.workers
 
-    # Load data
-    dataset_train = ColorCheckerDataset(train=True, folds_num=opt.foldnum)
-    dataloader_train = torch.utils.data.DataLoader(dataset_train,
-                                                   batch_size=opt.batch_size,
-                                                   shuffle=True,
-                                                   num_workers=opt.workers)
-    print('len_dataset_train:', len(dataset_train))
-    dataset_test = ColorCheckerDataset(train=False, folds_num=opt.foldnum)
-    dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=1, shuffle=True, num_workers=opt.workers)
-    print('len_dataset_test:', len(dataset_test))
-    print('training fold %d' % opt.foldnum)
+    os.makedirs(LOG_DIR, exist_ok=True)
+    log_name = os.path.join(LOG_DIR, 'log_fold_' + str(fold_num) + '.txt')
 
-    # Create the network
-    network = Model1Stage().to(device)
-    if opt.pth_path != '':
-        print('loading pretrained model')
-        network.load_state_dict(torch.load(opt.pth_path))
-    print(network)
-    with open(log_name, 'a') as f:
-        f.write(str(network) + '\n')
+    vh = VisdomHandler(port=VISDOM_PORT, env=opt.env + '-' + datetime.datetime.now().isoformat())
 
-    # Set the optimizer
-    lrate = opt.lrate
-    optimizer = optim.Adam(network.parameters(), lr=lrate)
+    # Training set
+    training_set = ColorCheckerDataset(train=True, folds_num=fold_num)
+    training_loader = torch.utils.data.DataLoader(training_set,
+                                                  batch_size=batch_size,
+                                                  shuffle=True,
+                                                  num_workers=workers)
 
-    # --- TRAINING ---
+    # Validation set
+    test_set = ColorCheckerDataset(train=False, folds_num=fold_num)
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=1, shuffle=True, num_workers=opt.workers)
 
-    train_loss, val_loss = AverageMeter(), AverageMeter()
-    best_val_loss = 100.0
-    best_mean, best_median, best_trimean = 100.0, 100.0, 100.0
-    best_bst25, best_wst25, best_pct95 = 100.0, 100.0, 100.0
+    print('Training set size: ...', len(training_set))
+    print('Test set size: .......', len(test_set))
 
-    print('Start train.....')
+    print('\n * Training fold %d * \n' % fold_num)
 
-    for epoch in range(opt.nepoch):
+    # Model
+    model = Model1Stage(device)
 
-        # Optimize
-        train_loss.reset()
-        network.train()
+    if opt.pth_path != "":
+        print('\n Loading pretrained model... \n')
+        model.load(opt.pth_path)
+
+    model.print_network()
+    model.log_network(log_name)
+    model.set_optimizer(learning_rate)
+
+    print("\n Training starts... \n")
+
+    for epoch in range(epochs):
+
+        mt.reset_losses()
+
+        # --- Training ---
+
+        model.train_mode()
         start = time.time()
 
-        for _, data in enumerate(dataloader_train):
-            optimizer.zero_grad()
+        for _, data in enumerate(training_loader):
+            model.reset_gradient()
             img, label, file_name = data
             img, label = img.to(device), label.to(device)
-
-            pred = network(img)
-            pred_ill = torch.nn.functional.normalize(torch.sum(torch.sum(pred, 2), 2), dim=1)
-
-            loss = get_angular_loss(pred_ill, label)
+            pred = model.predict(img)
+            loss = model.get_loss(pred, label)
             loss.backward()
-            train_loss.update(loss.item())
-            optimizer.step()
+            mt.update_train_loss(loss.item())
+            model.optimize()
 
-        time_use1 = time.time() - start
-        try:
-            vis.updateTrace(
-                X=np.array([epoch]),
-                Y=np.array([train_loss.avg]),
-                win=win_curve,
-                name='train loss'
-            )
-        except:
-            print('visdom error......')
+        vh.update(epoch, loss=mt.get_train_loss(), name="train loss")
 
-        # Evaluate
-        time_use2 = 0
-        val_loss.reset()
-        with torch.no_grad():
+        training_time = time.time() - start
 
-            if epoch % 5 == 0:
-                val_loss.reset()
-                network.eval()
-                start = time.time()
-                errors = []
+        # --- Validation ---
 
-                for _, data in enumerate(dataloader_test):
+        start = time.time()
+
+        if epoch % 5 == 0:
+            evaluator.reset_errors()
+            model.evaluation_mode()
+
+            with torch.no_grad():
+                for _, data in enumerate(test_loader):
                     img, label, file_name = data
                     img, label = img.to(device), label.to(device)
+                    pred = model.predict(img)
+                    loss = model.get_loss(pred, label)
+                    mt.update_val_loss(loss.item())
+                    evaluator.add_error(loss.item())
 
-                    pred = network(img)
-                    pred_ill = torch.nn.functional.normalize(torch.sum(torch.sum(pred, 2), 2), dim=1)
+            vh.update(epoch, loss=mt.get_val_loss(), name="val loss")
 
-                    loss = get_angular_loss(pred_ill, label)
-                    val_loss.update(loss.item())
-                    errors.append(loss.item())
+        validation_time = time.time() - start
 
-                time_use2 = time.time() - start
-                try:
-                    vis.updateTrace(
-                        X=np.array([epoch]),
-                        Y=np.array([val_loss.avg]),
-                        win=win_curve,
-                        name='val loss'
-                    )
-                except:
-                    print('visdom error......')
+        print("Epoch: {},  Train_loss: {},  Val_loss: {}, T_Time: {}, V_time: {}"
+              .format(epoch + 1, mt.get_train_loss(), mt.get_val_loss(), training_time, validation_time))
 
-        mean, median, trimean, bst25, wst25, pct95 = evaluate(errors)
-        print('Epoch: %d,  Train_loss: %f,  Val_loss: %f, T_Time: %f, V_time: %f'
-              % (epoch, train_loss.avg, val_loss.avg, time_use1, time_use2))
+        metrics = evaluator.compute_metrics()
+        if 0 < mt.get_val_loss() < mt.get_best_val_loss():
+            mt.update_metrics(metrics)
+            model.save(os.path.join(LOG_DIR, "fold" + str(fold_num) + ".pth"))
 
-        if 0 < val_loss.avg < best_val_loss:
-            best_val_loss = val_loss.avg
-            best_mean, best_median, best_trimean = mean, median, trimean
-            best_bst25, best_wst25, best_pct95 = bst25, wst25, pct95
-            torch.save(network.state_dict(), '%s/fold%d.pth' % (dir_name, opt.foldnum))
-
-        log_table = {
-            "train_loss": train_loss.avg,
-            "val_loss": val_loss.avg,
-            "epoch": epoch,
-            "lr": lrate,
-            "best_val_loss": best_val_loss,
-            "mean": best_mean,
-            "median": best_median,
-            "trimean": best_trimean,
-            "bst25": best_bst25,
-            "wst25": best_wst25,
-            "pct95": best_pct95
-        }
-        with open(log_name, 'a') as f:
-            f.write('json_stats: ' + json.dumps(log_table) + '\n')
+        mt.log_metrics(log_name, epoch)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batch_size', type=int, default=16, help='input batch size')
-    parser.add_argument('--nepoch', type=int, default=2000, help='number of epochs to train for')
-    parser.add_argument('--workers', type=int, help='number of data loading workers', default=30)
-    parser.add_argument('--lrate', type=float, default=0.0003, help='learning rate')
-    parser.add_argument('--env', type=str, default='mian', help='visdom environment')
-    parser.add_argument('--pth_path', type=str, default='')
-    parser.add_argument('--foldnum', type=int, default=0, help='fold number')
+    parser.add_argument('--batch_size', type=int, default=BATCH_SIZE, help='input batch size')
+    parser.add_argument('--nepoch', type=int, default=NUM_EPOCHS, help='number of epochs to train for')
+    parser.add_argument('--workers', type=int, default=WORKERS, help='number of data loading workers')
+    parser.add_argument('--lrate', type=float, default=LEARNING_RATE, help='learning rate')
+    parser.add_argument('--env', type=str, default=VISDOM_ENV, help='visdom environment')
+    parser.add_argument('--pth_path', type=str, default=PTH_PATH)
+    parser.add_argument('--foldnum', type=int, default=FOLD_NUM, help='fold number')
     opt = parser.parse_args()
-    print(opt)
-
-    now = datetime.datetime.now()
-    save_path = now.isoformat()
-    dir_name = './log/C4_sq_1stage'
-    if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
-    log_name = os.path.join(dir_name, 'log_fold' + str(opt.foldnum) + '.txt')
-    main(log_name)
+    print("\n Configuration: {} \n".format(opt))
+    main()
