@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.init as init
 
-from classes.c4.squeezenet.Fire import Fire
+from classes.c4.networks.squeezenet.Fire import Fire
 
 """ 
 This is the standard SqueezeNet implementation included in PyTorch at:

@@ -28,7 +28,10 @@ class AverageMeter(object):
     # Computes and stores the average and current value
 
     def __init__(self):
-        self.reset()
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
 
     def reset(self):
         self.val = 0
@@ -43,15 +46,11 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-def get_angular_loss(vec1, vec2):
-    safe_v = 0.999999
-    illum_normalized1 = torch.nn.functional.normalize(vec1, dim=1)
-    illum_normalized2 = torch.nn.functional.normalize(vec2, dim=1)
-    dot = torch.sum(illum_normalized1 * illum_normalized2, dim=1)
+def get_angular_loss(vec1: torch.Tensor, vec2: torch.Tensor, safe_v: float = 0.999999) -> torch.Tensor:
+    dot = torch.sum(torch.nn.functional.normalize(vec1, dim=1) * torch.nn.functional.normalize(vec2, dim=1), dim=1)
     dot = torch.clamp(dot, -safe_v, safe_v)
     angle = torch.acos(dot) * (180 / math.pi)
-    loss = torch.mean(angle)
-    return loss
+    return torch.mean(angle)
 
 
 def evaluate(errors):
@@ -66,4 +65,5 @@ def evaluate(errors):
     bst25 = np.mean(errors[:int(0.25 * len(errors))])
     wst25 = np.mean(errors[int(0.75 * len(errors)):])
     pct95 = g(0.95)
+
     return mean, median, trimean, bst25, wst25, pct95
