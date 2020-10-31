@@ -6,11 +6,11 @@ import os
 import torch.utils.data
 from torch.autograd import Variable
 
-from auxiliary.utils import *
+from auxiliary.utils import get_device
 from classes.c4.models.Model1Stage import Model1Stage
 from classes.c4.models.Model3Stages import Model3Stages
-from classes.data.ColorChecker import ColorCheckerDataset
-from classes.data.Evaluator import Evaluator
+from classes.data.ColorCheckerDataset import ColorCheckerDataset
+from classes.training.Evaluator import Evaluator
 
 """
 Reported results for C4-SqueezeNetFC4 on Color Checker:
@@ -49,7 +49,7 @@ def main():
                 img, label, file_name = data
                 img, label = Variable(img.to(device)), Variable(label.to(device))
                 pred = model.predict(img)
-                loss = model.get_loss(pred, label)
+                loss = model.get_angular_loss(pred, label)
                 evaluator.add_error(loss.item())
                 print('\t - Input: %s, AE: %f' % (file_name[0], loss.item()))
 

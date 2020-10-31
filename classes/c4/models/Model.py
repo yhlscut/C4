@@ -15,6 +15,9 @@ class Model:
     def predict(self, image: torch.Tensor) -> Union[torch.Tensor, tuple]:
         pass
 
+    def compute_loss(self, img: torch.Tensor, label: torch.Tensor) -> Union[list, float]:
+        pass
+
     def print_network(self):
         print(self._network)
 
@@ -43,9 +46,7 @@ class Model:
         self.__optimizer.step()
 
     @staticmethod
-    def get_loss(prediction: torch.Tensor, label: torch.Tensor, safe_v: float = 0.999999) -> torch.Tensor:
-        """ Angular loss """
-        dot = torch.sum(normalize(prediction, dim=1) * normalize(label, dim=1), dim=1)
-        dot = torch.clamp(dot, -safe_v, safe_v)
+    def get_angular_loss(pred: torch.Tensor, label: torch.Tensor, safe_v: float = 0.999999) -> torch.Tensor:
+        dot = torch.clamp(torch.sum(normalize(pred, dim=1) * normalize(label, dim=1), dim=1), -safe_v, safe_v)
         angle = torch.acos(dot) * (180 / math.pi)
         return torch.mean(angle)

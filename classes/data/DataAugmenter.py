@@ -13,7 +13,7 @@ class DataAugmenter:
         self.__fcn_input_size = (512, 512)
 
         # Rotation angle
-        self.__angle = 60.0
+        self.__angle = 60
 
         # Patch scale
         self.__scale = [0.1, 1.0]
@@ -32,7 +32,7 @@ class DataAugmenter:
         The returned image will be large enough to hold the entire new image, with a black background
         """
 
-        # Get the image size (no that's not an error - NumPy stores image matrices backwards)
+        # Get the image size (note: NumPy stores image matrices backwards)
         image_size = (image.shape[1], image.shape[0])
         image_center = tuple(np.array(image_size) / 2)
 
@@ -62,10 +62,10 @@ class DataAugmenter:
         new_w, new_h = int(abs(right_bound - left_bound)), int(abs(top_bound - bot_bound))
 
         # We require a translation matrix to keep the image centred
-        trans_mat = np.array([[1, 0, int(new_w * 0.5 - image_w2)], [0, 1, int(new_h * 0.5 - image_h2)], [0, 0, 1]])
+        trans_mat = np.matrix([[1, 0, int(new_w * 0.5 - image_w2)], [0, 1, int(new_h * 0.5 - image_h2)], [0, 0, 1]])
 
         # Compute the transform for the combined rotation and translation
-        affine_mat = (np.array(trans_mat) * np.array(rot_mat))[0:2, :]
+        affine_mat = (np.matrix(trans_mat) * np.matrix(rot_mat))[0:2, :]
 
         # Apply the transform
         return cv2.warpAffine(image, affine_mat, (new_w, new_h), flags=cv2.INTER_LINEAR)
@@ -118,16 +118,8 @@ class DataAugmenter:
         return self.__crop_around_center(self.__rotate_image(image, angle), target_width, target_height)
 
     def augment(self, img: np.array, illumination: np.array) -> tuple:
-
-        if img is None:
-            return None, None
-
         scale = math.exp(random.random() * math.log(self.__scale[1] / self.__scale[0])) * self.__scale[0]
         s = min(max(int(round(min(img.shape[:2]) * scale)), 10), min(img.shape[:2]))
-
-        color_aug = np.zeros(shape=(3, 3))
-        for i in range(3):
-            color_aug[i, i] = 1 + random.random() * self.__color - 0.5 * self.__color
 
         start_x = random.randrange(0, img.shape[0] - s + 1)
         start_y = random.randrange(0, img.shape[1] - s + 1)
@@ -140,6 +132,10 @@ class DataAugmenter:
         if random.randint(0, 1):
             img = img[:, ::-1]
         img = img.astype(np.float32)
+
+        color_aug = np.zeros(shape=(3, 3))
+        for i in range(3):
+            color_aug[i, i] = 1 + random.random() * self.__color - 0.5 * self.__color
         img *= np.array([[[color_aug[0][0], color_aug[1][1], color_aug[2][2]]]], dtype=np.float32)
         new_image = np.clip(img, 0, 65535)
 
