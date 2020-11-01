@@ -7,7 +7,7 @@ This implementation uses [Pytorch](http://pytorch.org/).
 
 ## Note
 
-This is a refactored objected-oriented version of the original code for the C4 method.
+This is a refactored version of the original code for the C4 method in an objected-oriented fashion. The code was tested and has the same behaviour of the original version. In particular, it is able to reproduce the same results shown in the paper.
 
 ## Installation
 Please install [Anaconda](https://www.anaconda.com/distribution/) firstly.
