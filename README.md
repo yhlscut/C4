@@ -5,6 +5,10 @@ AAAI 2020 [[paper link](https://arxiv.org/pdf/1912.11180.pdf)]
 
 This implementation uses [Pytorch](http://pytorch.org/).
 
+## Note
+
+This is a refactored objected-oriented version of the original code for the C4 method.
+
 ## Installation
 Please install [Anaconda](https://www.anaconda.com/distribution/) firstly.
 
