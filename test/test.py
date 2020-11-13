@@ -54,7 +54,7 @@ def main():
                 print('\t - Input: %s, AE: %f' % (file_name[0], loss.item()))
 
     metrics = evaluator.compute_metrics()
-    print("\n Mean ............ :{}".format(metrics["mean"]))
+    print("\n Mean ............ : {}".format(metrics["mean"]))
     print(" Median .......... : {}".format(metrics["median"]))
     print(" Trimean ......... : {}".format(metrics["trimean"]))
     print(" Best 25% ........ : {}".format(metrics["bst25"]))
