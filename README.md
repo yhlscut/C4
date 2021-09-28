@@ -1,13 +1,13 @@
 # Cascading Convolutional Color Constancy
 
+## IMPORTANT NOTE
+
+This is a refactored version of the original code for the C4 method in an objected-oriented fashion. The code was tested and has the same behaviour of the original version. In particular, it is able to reproduce the same results shown in the paper.
+
 Huanglin Yu, Ke Chen*, Kaiqi Wang, Yanlin Qian, Zhaoxiang Zhang, Kui Jia &nbsp; &nbsp;
 AAAI 2020 [[paper link](https://arxiv.org/pdf/1912.11180.pdf)]
 
 This implementation uses [Pytorch](http://pytorch.org/).
-
-## Note
-
-This is a refactored version of the original code for the C4 method in an objected-oriented fashion. The code was tested and has the same behaviour of the original version. In particular, it is able to reproduce the same results shown in the paper.
 
 ## Installation
 Please install [Anaconda](https://www.anaconda.com/distribution/) firstly.
