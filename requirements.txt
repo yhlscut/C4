@@ -1,5 +1,5 @@
 opencv-python
 scikit-image==0.15.0
 scipy==1.2.1
-numpy==1.17.0
+numpy==1.22.0
 visdom==0.1.7
